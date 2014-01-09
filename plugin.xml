@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="%category.view.name"
+            id="jcodesmith">
+      </category>
+      <view
+            allowMultiple="false"
+            category="jcodesmith"
+            class="org.jcodesmith.ui.db.views.DataBaseView"
+            icon="icons/sample.gif"
+            id="org.jcodesmith.db.views.DataBaseExplorer"
+            name="%db.view.name"
+            restorable="true">
+      </view>
+      
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+       	<menuContribution
+			locationURI="popup:org.eclipse.ui.popup.any" >
+           <separator
+                 name="jcodesmith.separator1" visible="true">
+           </separator>
+           <command
+                 commandId="jcodesmith.commands.template.excute"
+                 icon="icons/run.gif"
+                 style="push">
+          <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate>
+                     <!-- I know it can't find this, just ignore it -->
+                     <adapt
+                           type="org.eclipse.core.resources.IFile">
+                        <test
+                              property="org.eclipse.core.resources.name"
+                              value="*.ftl">
+                        </test>
+                     </adapt>
+                  </iterate>
+               </with>
+            </visibleWhen>
+           </command>
+		</menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            description="%category.name.main"
+            id="jcodesmith.commands.category"
+            name="%category.name.main">
+      </category>
+      <command
+            categoryId="jcodesmith.commands.category"
+            defaultHandler="org.jcodesmith.ui.handlers.TemplateExcuteHandlers"
+            description="%excute.command.name"
+            id="jcodesmith.commands.template.excute"
+            name="%excute.command.name">
+            
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.jcodesmith.ui.handlers.TemplateExcuteHandlers"
+            commandId="jcodesmith.commands.template.excute">
+      </handler>
+   </extension>
+   
+   
+
+</plugin>

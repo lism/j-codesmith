@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %Bundle-Name
+Bundle-SymbolicName: jcodesmith; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.jcodesmith.JCodeSmithActivator
+Bundle-Vendor: %Bundle-Vendor
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jdt,
+ org.eclipse.jdt.core,
+ org.eclipse.core.resources,
+ org.eclipse.jdt.ui,
+ org.eclipse.ui.ide
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .,
+ bin/,
+ lib/mysql-connector-5.1.6.jar,
+ lib/ojdbc6.jar,
+ lib/freemarker-2.3.19.jar,
+ lib/fastjson-1.1.37.jar
+Bundle-ActivationPolicy: lazy

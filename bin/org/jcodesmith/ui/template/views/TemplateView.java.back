@@ -1,0 +1,319 @@
+package org.jcodesmith.ui.template.views;
+
+import java.io.File;
+
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.INullSelectionListener;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.part.DrillDownAdapter;
+import org.eclipse.ui.part.ViewPart;
+import org.jcodesmith.ui.db.tree.BaseTreeNode;
+import org.jcodesmith.ui.db.tree.DefaultTreeViewContentProvider;
+import org.jcodesmith.ui.db.tree.DefaultViewLabelProvider;
+import org.jcodesmith.ui.template.action.TemplateActionGroup;
+import org.jcodesmith.ui.template.tree.TreeNode;
+import org.jcodesmith.ui.template.tree.TreeNode.NodeType;
+
+/**
+ * 模板文件目录
+ */
+
+public class TemplateView extends ViewPart implements IMenuListener,INullSelectionListener{
+
+    /**
+     * The ID of the view as specified by the extension.
+     */
+    public static final String ID = "org.jcodesmith.template.views.TemplateExplorer";
+
+    private static TemplateView instance;
+
+    private static TreeViewer viewer;
+
+    private DrillDownAdapter drillDownAdapter;
+    
+    private Menu fContextMenu;
+
+    /**
+     * 树创建
+     */
+    private DefaultTreeViewContentProvider treeViewContentProvider;
+    
+  
+    private TemplateActionGroup actionGroup;
+
+
+
+
+    public synchronized static TemplateView getInstance() {
+        if (instance == null) {
+            instance = new TemplateView();
+        }
+        return instance;
+    }
+
+    public TemplateView() {
+        instance = this;
+    }
+
+    public void addDirectory(String path) {
+        addDirectory(path, false);
+    }
+
+    /**
+     * 获取选择的节点
+     * 
+     * @return
+     */
+    public static TreeNode getSelectNode() {
+        BaseTreeNode selectNode = (BaseTreeNode) ((StructuredSelection) viewer.getSelection()).getFirstElement();
+        if (selectNode == null || !(selectNode instanceof TreeNode)) {
+            return null;
+        } else {
+            return (TreeNode) selectNode;
+        }
+    }
+
+    /**
+     * 获取选择的Ftl节点
+     * 
+     * @return
+     */
+    public static TreeNode getSelectFtlFileNode() {
+        TreeNode tn = getSelectNode();
+        if (tn == null) {
+            return null;
+        }
+        if (NodeType.FREEMARK.equals(tn.getType())) {
+            return tn;
+        } else {
+            return null;
+        }
+    }
+
+    private void addDirectory(String path, boolean isInitalize) {
+        // 创建根节点
+        File fl = new File(path);
+        if (fl == null || !fl.isDirectory()) {
+            showMessage("目录不存在，请重新选择！");
+        }
+        TreeNode p = null;
+        BaseTreeNode invisibleRoot = treeViewContentProvider.getDataInputRoot();
+
+        boolean isExist = false;
+        if (invisibleRoot.getChildren() != null) {
+            for (BaseTreeNode a : invisibleRoot.getChildrenList()) {
+                TreeNode b = (TreeNode) a;
+                if (b.getFullPathName().equals(fl.getPath())) {
+                    isExist = true;
+                    p = b;
+                    break;
+                }
+            }
+        }
+        if (!isExist) {
+            p = createTreeNode(fl);
+            invisibleRoot.addChild(p);
+        } else {
+            // 刷新
+            p.clear();
+            listFiles(fl, p, true);
+            viewer.setInput(invisibleRoot);
+            return;
+        }
+        // 递归查询子节点
+        listFiles(fl, p, true);
+        viewer.setInput(invisibleRoot);
+
+        if (!isInitalize) {
+            TemplateProject tp = new TemplateProject();
+            tp.setName(p.getName());
+            tp.setPath(p.getFullPathName());
+            TemplateProjectManager.getConfigMgr().put(tp);
+        }
+    }
+
+    /**
+     * 递归查询目录下的file
+     * 
+     * @param vfile
+     * @param resultFileName
+     * @return
+     */
+    private void listFiles(File vfile, TreeNode parent, boolean listSubDir) {
+        File[] files = vfile.listFiles();
+        if (files == null)
+            return;// 判断目录下是不是空的
+        parent.setLoadedChildren(true);
+        for (File f : files) {
+            TreeNode node = createTreeNode(f);
+            if (node != null) {
+                parent.addChild(node);
+                if (listSubDir && f.isDirectory()) {// 判断是否文件夹
+                    listFiles(f, node, listSubDir);// 调用自身,查找子目录
+                }
+            }
+        }
+        return;
+    }
+
+    private TreeNode createTreeNode(File file) {
+        NodeType type = NodeType.getFromFile(file);
+        if (type == null) {
+            return null;
+        }
+        TreeNode node = new TreeNode(file.getName());
+        node.setType(type);
+        node.setFullPathName(file.getPath());
+
+        return node;
+    }
+
+    /**
+     * This is a callback that will allow us to create the viewer and initialize
+     * it.
+     */
+    @Override
+    public void createPartControl(Composite parent) {
+        viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        drillDownAdapter = new DrillDownAdapter(viewer);
+        treeViewContentProvider = new DefaultTreeViewContentProvider(this);
+        viewer.setContentProvider(treeViewContentProvider);
+
+        viewer.setLabelProvider(new DefaultViewLabelProvider());
+        viewer.setInput(treeViewContentProvider.getDataInputRoot());
+        viewer.setSorter(new NameSorter());
+        viewer.setInput(getViewSite());
+        
+        IWorkbenchPartSite site= getSite();
+        site.setSelectionProvider(viewer);
+        //
+        // // Create the help context id for the viewer's control
+        // PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(),
+        // "jcodesmith.viewer");
+
+        MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
+        menuMgr.setRemoveAllWhenShown(true);
+        menuMgr.addMenuListener(this);
+        fContextMenu= menuMgr.createContextMenu(viewer.getTree());
+        viewer.getTree().setMenu(fContextMenu);
+        
+        createActions();
+        hookContextMenu();
+        contributeToActionBars();
+        
+        // 初始化view
+        initView();
+    }
+
+    private void initView() {
+        String[] paths = TemplateProjectManager.getConfigMgr().listAllKey();
+        for (String p : paths) {
+            addDirectory(p, true);
+        }
+
+    }
+
+    private void hookContextMenu() {
+        MenuManager menuMgr = new MenuManager("#PopupMenu");
+        menuMgr.setRemoveAllWhenShown(true);
+        menuMgr.addMenuListener(new IMenuListener() {
+            public void menuAboutToShow(IMenuManager manager) {
+                TemplateView.this.fillContextMenu(manager);
+            }
+        });
+        Menu menu = menuMgr.createContextMenu(viewer.getControl());
+        viewer.getControl().setMenu(menu);
+        getSite().registerContextMenu(menuMgr, viewer);
+    }
+
+    private void contributeToActionBars() {
+        IActionBars bars = getViewSite().getActionBars();
+        // fillLocalPullDown(bars.getMenuManager());
+        actionGroup. fillActionBars(bars);
+    }
+
+        
+
+    private void fillContextMenu(IMenuManager menu) {
+        
+
+        actionGroup.setContext(new ActionContext(getSelection()));
+        actionGroup.fillContextMenu(menu);
+        actionGroup.setContext(null);
+        
+        
+    }
+
+
+    private void createActions() {
+
+        actionGroup=new TemplateActionGroup();
+        
+        IWorkbenchWindow window = this.getSite().getWorkbenchWindow();
+
+    }
+
+
+    private void showMessage(String message) {
+        MessageDialog.openInformation(viewer.getControl().getShell(), "Template Explorer", message);
+    }
+
+    /**
+     * Passing the focus request to the viewer's control.
+     */
+    public void setFocus() {
+        viewer.getControl().setFocus();
+    }
+
+    class NameSorter extends ViewerSorter {
+    }
+    
+    private ISelection getSelection() {
+        return viewer.getSelection();
+    }
+
+    @Override
+    public void menuAboutToShow(IMenuManager menu) {
+
+        actionGroup.setContext(new ActionContext(getSelection()));
+        actionGroup.fillContextMenu(menu);
+        actionGroup.setContext(null);
+    }
+
+    @Override
+    public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+        // TODO Auto-generated method stub
+        return;
+    }
+    
+    @Override
+    public void dispose() {
+
+        if (fContextMenu != null && !fContextMenu.isDisposed())
+            fContextMenu.dispose();
+
+
+        if (viewer != null)
+            viewer=null;
+        
+        if (actionGroup != null)
+            actionGroup.dispose();
+
+        super.dispose();
+    }
+
+}

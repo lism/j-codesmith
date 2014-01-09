@@ -1,0 +1,59 @@
+/**
+ * 
+ */
+package org.jcodesmith.ui.template.action;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.jcodesmith.ui.template.views.TemplateView;
+
+/**
+ * @author greki.shen 打开模板文件目录
+ */
+public class OpenDirectoryAction extends Action {
+
+    private DirectoryDialog directDialog;
+
+    private TemplateView templateView;
+
+    // 返回目录
+    private String directory;
+
+    public OpenDirectoryAction(TemplateView templateView) {
+        this.templateView = templateView;
+        setText("打开模板目录");
+        setToolTipText("选择模板文件目录");
+    }
+
+    /**
+     * 执行
+     */
+    @Override
+    public void run() {
+        initDialog();
+        String path = directory = directDialog.open();
+        templateView.addDirectory(path);
+
+    }
+
+    /**
+     * 初始化对话框
+     */
+    private void initDialog() {
+        directDialog = new DirectoryDialog(templateView.getViewSite().getShell(), SWT.OPEN);
+        directDialog.setText("选择模板目录");
+        directDialog.setMessage("选择模板目录");
+
+    }
+
+    /**
+     * 获取打开的目录
+     * 
+     * @return
+     */
+    public String getDirectory() {
+        return directory;
+    }
+
+}
