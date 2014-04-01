@@ -222,7 +222,7 @@ public class CommonUtil {
                 sMemberList += ",\r\n\t\t\t";
             }
             sColumnList += col.getName();
-            if (col.getName().toUpperCase() != "GMT_CREATED" && col.getName().toUpperCase() != "GMT_MODIFIED") {
+            if (!col.getName().toUpperCase().equals( "GMT_CREATED" )&& !col.getName().toUpperCase().equals("GMT_MODIFIED")) {
                 sMemberList += MessageFormat.format("#{0}#", propertyName(col));
             } else {
                 sMemberList += getSqlNowStr(table);
@@ -231,7 +231,6 @@ public class CommonUtil {
         return MessageFormat.format("insert into {0} ( \r\n\t\t\t{1} \r\n\t\t) values ( \r\n\t\t\t{2}  \r\n\t\t)",
                 table.getName(), sColumnList, sMemberList);
     }
-
     
     public static String getSqlNowStr(TableMeta table){
         if(table.getDatabase().getDatabaseType().equals(DataBaseType.MYSQL)){
@@ -307,5 +306,8 @@ public class CommonUtil {
         SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd");
         return sd.format(new Date());
     }
-
+    
+    public static String package2path(String pack){
+        return pack.replaceAll("\\.","/");
+    }
 }

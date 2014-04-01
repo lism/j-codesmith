@@ -6,7 +6,7 @@ import java.util.Properties;
 
 import org.jcodesmith.db.dal.DataBaseType;
 import org.jcodesmith.plugin.helper.ConfigFileData;
-import org.jcodesmith.plugin.utils.PropertiesUtil;
+import org.jcodesmith.utils.FileUtil;
 
 /**
  * 数据库连接配置信息
@@ -45,7 +45,7 @@ public class DatabaseConfig implements ConfigFileData {
 	 * @param propFile
 	 */
 	public DatabaseConfig(String propFile) {
-		Properties p = PropertiesUtil.loadProperties(propFile);
+		Properties p = FileUtil.loadProperties(propFile);
 
 		this.setUrl(p.getProperty("database.url", ""));
 

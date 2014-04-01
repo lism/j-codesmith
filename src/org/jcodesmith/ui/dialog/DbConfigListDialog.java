@@ -59,14 +59,18 @@ public class DbConfigListDialog extends Dialog {
     private DatabaseConfig retConfig;
 
     private String selectedName;
+    
+    private int shellStyle = SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE;
 
     protected DbConfigListDialog(Shell parentShell) {
         super(parentShell);
+        setShellStyle(shellStyle);
     }
 
     protected DbConfigListDialog(Shell parentShell, String selectedName) {
         super(parentShell);
         this.selectedName = selectedName;
+        setShellStyle(shellStyle);
     }
 
     public static void main(String[] args) throws ParseException {

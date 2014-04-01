@@ -1,5 +1,6 @@
 package org.jcodesmith.plugin.helper;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,14 +8,25 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -22,9 +34,11 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 import org.jcodesmith.JCodeSmithActivator;
 
 public class PluginHelper {
@@ -163,13 +177,12 @@ public class PluginHelper {
 
     /**
      * 初始化资源文件
+     * 
      * @param path
      */
     public static void initResourceFile(String path) {
         String outpath = getConfigFilePath(path);
-     
 
-      
         String s = PluginHelper.class.getProtectionDomain().getCodeSource().getLocation().toString();
         if (s.endsWith(".jar")) {
             s = "jar:" + s + "!";
@@ -182,14 +195,14 @@ public class PluginHelper {
         try {
             if (outFile.exists()) {
                 return;
-            }else{
-               String p=outFile.getParent();
-               File pfile= new File(p);
-               if(!pfile.exists() ){
-                   pfile.mkdirs();
-               }
+            } else {
+                String p = outFile.getParent();
+                File pfile = new File(p);
+                if (!pfile.exists()) {
+                    pfile.mkdirs();
+                }
             }
-            
+
             URL a = new URL(s);
 
             out = new FileOutputStream(outFile);
@@ -222,19 +235,22 @@ public class PluginHelper {
         }
 
     }
-    
+
     // 根据Unicode编码完美的判断中文汉字和符号
     private static boolean isChinese(char c) {
         Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
-        if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
-                || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
-                || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
+        if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+                || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+                || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
+                || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+                || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
                 || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION) {
             return true;
         }
         return false;
     }
- 
+
     // 完整的判断中文汉字和符号
     public static boolean isChinese(String strName) {
         char[] ch = strName.toCharArray();
@@ -247,131 +263,123 @@ public class PluginHelper {
         return false;
     }
 
-    // /**
-    // * 获取默认的工程
-    // *
-    // * @return
-    // */
-    // public static IProject getDefaultProject() {
-    // try {
-    // IProject project = PluginHelper.getSelectProject();
-    // if (project == null) {
-    // project = PluginHelper.getActiveProject();
-    // }
-    // if (project == null) {
-    // project =
-    // ResourcesPlugin.getWorkspace().getRoot().getProject(JCodeSmithActivator.PLUGIN_ID);
-    // }
-    // if (!project.exists()) {
-    // project.create(null);
-    // }
-    // if (!project.isOpen()) {
-    // IProgressMonitor monitor = new NullProgressMonitor();
-    // project.open(monitor);
-    // }
-    // return project;
-    // } catch (CoreException e) {
-    // e.printStackTrace();
-    // return null;
-    // }
-    //
-    // }
+    /**
+     * 获取默认的工程
+     * 
+     * @return
+     */
+    public static IProject getDefaultProject() {
+        try {
+            IProject project = PluginHelper.getSelectProject();
+            if (project == null) {
+                project = PluginHelper.getActiveProject();
+            }
+            if (project == null) {
+                project = ResourcesPlugin.getWorkspace().getRoot().getProject(JCodeSmithActivator.PLUGIN_ID);
+            }
+            if (!project.isOpen()) {
+                IProgressMonitor monitor = new NullProgressMonitor();
+                project.open(monitor);
+            }
+            return project;
+        } catch (CoreException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-    // /**
-    // * 获取当前选中的工程
-    // *
-    // * @return
-    // */
-    // @SuppressWarnings("restriction")
-    // public static IProject getSelectProject() {
-    // ISelectionService selectionService =
-    // PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
-    //
-    // ISelection selection = selectionService.getSelection();
-    //
-    // IProject project = null;
-    // if (selection instanceof IStructuredSelection) {
-    // Object element = ((IStructuredSelection) selection).getFirstElement();
-    //
-    // if (element instanceof IResource) {
-    // project = ((IResource) element).getProject();
-    // } else if (element instanceof PackageFragmentRootContainer) {
-    // IJavaProject jProject = ((PackageFragmentRootContainer)
-    // element).getJavaProject();
-    // project = jProject.getProject();
-    // } else if (element instanceof IJavaElement) {
-    // IJavaProject jProject = ((IJavaElement) element).getJavaProject();
-    // project = jProject.getProject();
-    // }
-    // }
-    // return project;
-    // }
+    /**
+     * 获取当前选中的工程
+     * 
+     * @return
+     */
+    @SuppressWarnings("restriction")
+    public static IProject getSelectProject() {
+        ISelectionService selectionService = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
 
-    // /**
-    // * 获取当前激活的工程
-    // *
-    // * @return
-    // */
-    // @SuppressWarnings("restriction")
-    // public static IProject getActiveProject() {
-    // IProject project = null;
-    //
-    // // 1.根据当前编辑器获取工程
-    // IEditorPart part = getActiveEditor();
-    // if (part != null) {
-    // Object object = part.getEditorInput().getAdapter(IFile.class);
-    // if (object != null) {
-    // project = ((IFile) object).getProject();
-    // }
-    // }
-    //
-    // if (project == null) {
-    // ISelectionService selectionService =
-    // PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-    // .getSelectionService();
-    // ISelection selection = selectionService.getSelection();
-    // if (selection instanceof IStructuredSelection) {
-    // Object element = ((IStructuredSelection) selection).getFirstElement();
-    //
-    // if (element instanceof IResource) {
-    // project = ((IResource) element).getProject();
-    // } else if (element instanceof PackageFragmentRootContainer) {
-    // IJavaProject jProject = ((PackageFragmentRootContainer)
-    // element).getJavaProject();
-    // project = jProject.getProject();
-    // } else if (element instanceof IJavaElement) {
-    // IJavaProject jProject = ((IJavaElement) element).getJavaProject();
-    // project = jProject.getProject();
-    // } else if (element instanceof IEditorPart) {
-    // project = ((IFile) ((IEditorPart)
-    // element).getEditorInput().getAdapter(IFile.class)).getProject();
-    // }
-    // }
-    // }
-    //
-    // return project;
-    // }
-    //
-    // /**
-    // * 在java editor里打开内容
-    // *
-    // * @param content
-    // */
-    // public static void openWithJavaEditor(String content, String filePath) {
-    // try {
-    // IProject project = PluginHelper.getDefaultProject();
-    // if (project == null) {
-    // return;
-    // }
-    // IFile java_file = project.getFile(new Path(filePath));
-    // if (!java_file.exists())
-    // java_file.create(new ByteArrayInputStream(content.getBytes()), false,
-    // null);
-    // IWorkbenchPage page =
-    // PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-    // IDE.openEditor(page, java_file);
-    // } catch (Exception e) {
-    // PluginLogger.openInformation(e.getMessage());
-    // }
-    // }
+        ISelection selection = selectionService.getSelection();
+
+        IProject project = null;
+        if (selection instanceof IStructuredSelection) {
+            Object element = ((IStructuredSelection) selection).getFirstElement();
+
+            if (element instanceof IResource) {
+                project = ((IResource) element).getProject();
+            } else if (element instanceof PackageFragmentRootContainer) {
+                IJavaProject jProject = ((PackageFragmentRootContainer) element).getJavaProject();
+                project = jProject.getProject();
+            } else if (element instanceof IJavaElement) {
+                IJavaProject jProject = ((IJavaElement) element).getJavaProject();
+                project = jProject.getProject();
+            }
+        }
+        return project;
+    }
+
+    /**
+     * 获取当前激活的工程
+     * 
+     * @return
+     */
+    @SuppressWarnings("restriction")
+    public static IProject getActiveProject() {
+        IProject project = null;
+
+        // 1.根据当前编辑器获取工程
+        IEditorPart part = getActiveEditor();
+        if (part != null) {
+            Object object = part.getEditorInput().getAdapter(IFile.class);
+            if (object != null) {
+                project = ((IFile) object).getProject();
+            }
+        }
+
+        if (project == null) {
+            ISelectionService selectionService = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+                    .getSelectionService();
+            ISelection selection = selectionService.getSelection();
+            if (selection instanceof IStructuredSelection) {
+                Object element = ((IStructuredSelection) selection).getFirstElement();
+
+                if (element instanceof IResource) {
+                    project = ((IResource) element).getProject();
+                } else if (element instanceof PackageFragmentRootContainer) {
+                    IJavaProject jProject = ((PackageFragmentRootContainer) element).getJavaProject();
+                    project = jProject.getProject();
+                } else if (element instanceof IJavaElement) {
+                    IJavaProject jProject = ((IJavaElement) element).getJavaProject();
+                    project = jProject.getProject();
+                } else if (element instanceof IEditorPart) {
+                    project = ((IFile) ((IEditorPart) element).getEditorInput().getAdapter(IFile.class)).getProject();
+                }
+            }
+        }
+
+        return project;
+    }
+
+    /**
+     * 在java editor里打开内容
+     * 
+     * @param content
+     */
+    public static void openWithJavaEditor(String content, String filePath) {
+        try {
+            IProject project = PluginHelper.getDefaultProject();
+            if (project == null ) {
+                return;
+            }else{
+                if (!project.exists()) {
+                    project.create(null);
+                }
+            }
+            IFile java_file = project.getFile(new Path(filePath));
+            if (!java_file.exists())
+                java_file.create(new ByteArrayInputStream(content.getBytes()), false, null);
+            IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+            IDE.openEditor(page, java_file);
+        } catch (Exception e) {
+            PluginLogger.openInformation(e.getMessage());
+        }
+    }
 }

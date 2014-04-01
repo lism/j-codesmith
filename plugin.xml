@@ -74,6 +74,7 @@
             
       </command>
    </extension>
+   <!--
    <extension
          point="org.eclipse.ui.handlers">
       <handler
@@ -81,7 +82,7 @@
             commandId="jcodesmith.commands.template.excute">
       </handler>
    </extension>
-   
+   -->
    
 
 </plugin>

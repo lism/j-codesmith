@@ -1,10 +1,15 @@
 package org.jcodesmith.ui.dialog;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -17,21 +22,22 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.IHandlerService;
 import org.jcodesmith.db.meta.TableMeta;
 import org.jcodesmith.engine.SupportType;
 import org.jcodesmith.engine.TemplateObject;
 import org.jcodesmith.engine.TemplateProperty;
+import org.jcodesmith.plugin.helper.PluginHelper;
 import org.jcodesmith.plugin.helper.PluginLogger;
 
 public class ExcuteDialog extends Dialog {
 
-    Button save;
     Button saveAs;
     Button copy;
 
@@ -67,13 +73,10 @@ public class ExcuteDialog extends Dialog {
         label.setText(property.getName());
         // 横向满
         GridData leftgd = new GridData(GridData.FILL_HORIZONTAL);
-        if (SupportType.TABLE.getType().equals(property.getType())) {
-            leftgd.horizontalSpan = 1;
-        } else {
-            leftgd.horizontalSpan = 2;
-        }
+        leftgd.horizontalSpan = 2;
+
         Control ctr = null;
-        if (SupportType.BOOLEAN.getType().equals(property.getType())) {
+        if (SupportType.BOOLEAN.equals(property.getType())) {
             Combo combo = new Combo(parent, SWT.NULL);
             combo.setItems(new String[] { "true", "false" });
 
@@ -87,8 +90,8 @@ public class ExcuteDialog extends Dialog {
             Text text = new Text(parent, SWT.BORDER | SWT.SINGLE);
             text.setText(property.getDefaultValue());
             ctr = text;
-            if (SupportType.TABLE.getType().equals(property.getType())
-                    || SupportType.TABLES.getType().equals(property.getType())) {
+            if (SupportType.TABLE.equals(property.getType()) || SupportType.TABLES.equals(property.getType())) {
+                leftgd.horizontalSpan = 1;
                 // creat select type button
                 Button b = new Button(parent, SWT.PUSH);
                 b.setText("Select");
@@ -97,10 +100,22 @@ public class ExcuteDialog extends Dialog {
                 b.setLayoutData(btnGd);
                 ctr.setData(property.getValue());
                 boolean isMulti = false;
-                if (SupportType.TABLES.getType().equals(property.getType())) {
+                if (SupportType.TABLES.equals(property.getType())) {
                     isMulti = true;
                 }
                 b.addSelectionListener(new SelectTableListener(ctr, isMulti));
+                text.setText("");
+            }else if(SupportType.DIR.equals(property.getType())){
+                leftgd.horizontalSpan = 1;
+                // creat select type button
+                Button b = new Button(parent, SWT.PUSH);
+                b.setText("SELECT");
+                b.setToolTipText("select directory");
+                GridData btnGd = new GridData(50, 30);
+                btnGd.verticalAlignment = SWT.END;
+                b.setLayoutData(btnGd);
+                ctr.setData(property.getValue());
+                b.addSelectionListener(new SelectDirectoryListener(ctr));
                 text.setText("");
             }
         }
@@ -168,24 +183,13 @@ public class ExcuteDialog extends Dialog {
     }
 
     /**
-     * 创建测试连接按钮
+     * 创建按钮
      * 
      * @param parent
      */
     private void createButtons(Composite parent) {
 
-        save = new Button(parent, SWT.PUSH);
-        save.setToolTipText("save");
-        save.setImage(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ETOOL_SAVE_EDIT)
-                .createImage());
-
         GridData btnGd = new GridData(30, 30);
-        btnGd.horizontalAlignment = SWT.LEFT;
-        save.setLayoutData(btnGd);
-
-        
-        
-        
         saveAs = new Button(parent, SWT.PUSH);
         saveAs.setToolTipText("save as");
         saveAs.setImage(PlatformUI.getWorkbench().getSharedImages()
@@ -196,14 +200,38 @@ public class ExcuteDialog extends Dialog {
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                IHandlerService handlerService = (IHandlerService) PlatformUI.getWorkbench().getService(
-                        IHandlerService.class);
-                try {
-                    handlerService.executeCommand("org.eclipse.ui.file.saveAs", null);
-                } catch (Exception ex) {
-                    throw new RuntimeException("org.eclipse.ui.file.saveAs not found", ex);
+                if (result.getText().isEmpty()) {
+                    PluginLogger.openInformation("Please  execute first, and then save.");
+                    return;
                 }
-
+                FileDialog filedg = new FileDialog(getParentShell(), SWT.SAVE);
+                // 获取默认的工程路径
+                IProject p = PluginHelper.getDefaultProject();
+                if (p != null) {
+                    filedg.setFilterPath(p.getLocation().toOSString());
+                }
+                // 打开保存对话框
+                String f = filedg.open();
+                FileWriter fw = null;
+                if (f != null) {
+                    try {
+                        fw = new FileWriter(f);
+                        fw.write(result.getText());
+                        p.refreshLocal(IResource.DEPTH_ZERO, null);
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    } catch (CoreException e1) {
+                        e1.printStackTrace();
+                    } finally {
+                        if (fw != null) {
+                            try {
+                                fw.close();
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                    }
+                }
             }
 
             @Override
@@ -275,15 +303,17 @@ public class ExcuteDialog extends Dialog {
 
         for (TemplateProperty p : tplObject.getPropertyList()) {
             Control ctr = controlMap.get(p.getName());
-            if (SupportType.TABLE.getType().equals(p.getType()) || SupportType.TABLES.getType().equals(p.getType())) {
+            if (SupportType.TABLE.equals(p.getType()) || SupportType.TABLES.equals(p.getType())) {
                 p.setValue(ctr.getData());
-            } else if (SupportType.BOOLEAN.getType().equals(p.getType())) {
+            } else if (SupportType.BOOLEAN.equals(p.getType())) {
                 p.setValue(Boolean.valueOf(((Combo) ctr).getText()));
-            } else if (SupportType.DOUBLE.getType().equals(p.getType())) {
+            } else if (SupportType.DOUBLE.equals(p.getType())) {
                 p.setValue(Double.valueOf(((Text) ctr).getText()));
-            } else if (SupportType.LONG.getType().equals(p.getType())) {
+            } else if (SupportType.LONG.equals(p.getType())) {
                 p.setValue(Long.valueOf(((Text) ctr).getText()));
-            } else if (SupportType.STRING.getType().equals(p.getType())) {
+            } else if (SupportType.STRING.equals(p.getType())) {
+                p.setValue(((Text) ctr).getText());
+            }else if (SupportType.DIR.equals(p.getType())) {
                 p.setValue(((Text) ctr).getText());
             }
         }
@@ -335,13 +365,70 @@ public class ExcuteDialog extends Dialog {
 
             int ret = d.open();
             if (ret == OK) {
-                ctrl.setData(d.getSelectTable());
-                if (ctrl instanceof Text && d.getSelectTable() != null) {
-                    ((Text) ctrl).setText(d.getSelectTable().getName());
+                String txt = null;
+                if (isMulti) {
+                    ctrl.setData(d.getSelectTables());
+                    if (d.getSelectTables() != null) {
+                        for (TableMeta tbl : d.getSelectTables()) {
+                            if (txt == null) {
+                                txt = tbl.getName();
+                            } else {
+                                txt += "," + tbl.getName();
+                            }
+                        }
+                    }
+                } else {
+                    ctrl.setData(d.getSelectTable());
+                    if (d.getSelectTable() != null) {
+                        txt = d.getSelectTable().getName();
+                    }
+                }
+                if (ctrl instanceof Text && txt != null) {
+                    ((Text) ctrl).setText(txt);
                 }
             }
         }
 
+        @Override
+        public void widgetDefaultSelected(SelectionEvent e) {
+
+        }
+
+    }
+    
+    
+
+    /**
+     * select table
+     * 
+     * 
+     */
+    class SelectDirectoryListener implements SelectionListener {
+
+        private Control ctrl;
+
+        public SelectDirectoryListener(Control ctr) {
+            ctrl = ctr;
+        }
+
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+
+            DirectoryDialog d = new DirectoryDialog(getParentShell(), SWT.OPEN);
+            // 获取默认的工程路径
+            IProject p = PluginHelper.getDefaultProject();
+            if (p != null) {
+                d.setFilterPath(p.getLocation().toOSString());
+            }
+            
+            String ret = d.open();
+            ctrl.setData(ret);
+            if (ret == null || !ret.isEmpty()) {
+                if (ctrl instanceof Text ) {
+                    ((Text) ctrl).setText(ret);
+                }
+            }
+        }
         @Override
         public void widgetDefaultSelected(SelectionEvent e) {
 

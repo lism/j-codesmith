@@ -14,6 +14,10 @@
  */
 package org.jcodesmith.engine;
 
+import java.util.ArrayList;
+
+import org.jcodesmith.db.meta.TableMeta;
+
 
 /**
  * @Type SupportType
@@ -24,36 +28,45 @@ package org.jcodesmith.engine;
  */
 public enum SupportType {
     
-    STRING("String"),BOOLEAN("boolean"),LONG("long"),DOUBLE("double"),TABLE("table"),TABLES("tables");
+    STRING("String"),BOOLEAN("boolean"),LONG("long"),DOUBLE("double"),TABLE("table"),TABLES("tables"),DIR("dir");
     
-    private String javaType;
     private String type;
+    private Class<?> clazz;
     
     SupportType(String type){
-    
         this.type=type;
         if(type.equals("table")){
-            javaType="org.jcodesmith.db.meta.TableMeta";
+            clazz=TableMeta.class;
         }else   if(type.equals("tables")){
-            javaType="java.util.ArrayList.ArrayList<org.jcodesmith.db.meta.TableMeta>";
+            clazz=ArrayList.class;
+        }else if(type.toLowerCase().equals("string")){
+            clazz=String.class;
+        } else if(type.toLowerCase().equals("dir")){
+            clazz=String.class;
+        }
+        else if(type.toLowerCase().equals("boolean")){
+            clazz=Boolean.class;
+        }
+        else if(type.toLowerCase().equals("long")){
+            clazz=Long.class;
+        }
+        else if(type.toLowerCase().equals("double")){
+            clazz=Double.class;
         }else{
-            javaType=type;
+            throw new IllegalArgumentException("error type");
         }
     }
     
 
 
-    public String getJavaType() {
-        return javaType;
+
+    public Class<?> getClazz() {
+        return clazz;
     }
 
-
-
-    public void setJavaType(String javaType) {
-        this.javaType = javaType;
+    public void setClazz(Class<?> clazz) {
+        this.clazz = clazz;
     }
-
-
 
     public String getType() {
         return type;
@@ -65,19 +78,12 @@ public enum SupportType {
         this.type = type;
     }
 
-
-
-    /**
-     * 获取支持的JAVA类型
-     * @return
-     */
-    public static String[] getSupportTypes(){
-        String[] ret=new String[SupportType.values().length];
-        int i=0;
-        for (SupportType t : SupportType.values()) {
-            ret[i]=t.javaType;
-            i++;
-        }
-        return ret;
-    }
+   public static SupportType getEnum(String type){
+       for (SupportType t : SupportType.values()) {
+         if( t.getType().equals(type)){
+              return t;
+          }
+       }
+       throw new IllegalArgumentException("error type");
+   }
 }

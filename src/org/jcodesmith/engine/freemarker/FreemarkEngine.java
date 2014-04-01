@@ -21,15 +21,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.Map.Entry;
+import java.util.StringTokenizer;
 
+import org.jcodesmith.engine.ExcuteTracker;
 import org.jcodesmith.engine.ITemplateEngine;
 import org.jcodesmith.engine.ShareVariables;
+import org.jcodesmith.engine.TemplateObject;
 import org.jcodesmith.engine.TemplateProperty;
 
 import freemarker.cache.TemplateLoader;
-import freemarker.core.TemplateObject;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -43,9 +44,7 @@ import freemarker.template.TemplateModelException;
  * @Version V1.0
  */
 public class FreemarkEngine implements ITemplateEngine {
-
-    private final String TemplateVaribleName="template";
-            
+ 
     static Configuration configuration=new Configuration();
     static{
         
@@ -121,12 +120,12 @@ public class FreemarkEngine implements ITemplateEngine {
         //合并模板输出
         try {
             Template template=getTemplate(templatePath);
+            ExcuteTracker.setExcutingTemplateObject(templateObj);
             template.process(context, wr);
+            //ExcuteTracker.setExcutingTemplateObject(null);
         } catch (TemplateException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -142,7 +141,7 @@ public class FreemarkEngine implements ITemplateEngine {
             for (TemplateProperty p : templateObj.getPropertyList()) {
                 map.put(p.getName(), p.getValue());
             }
-            map.put(TemplateVaribleName, templateObj.getTemplatePath());
+            map.put(ShareVariables.TEMPALTE_OBJECT_NAME, templateObj);
         }
     }
 }

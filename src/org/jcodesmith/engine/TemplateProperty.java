@@ -24,7 +24,7 @@ package org.jcodesmith.engine;
 public class TemplateProperty {
     
     private String name;
-    private String type;
+    private SupportType type;
     private Object value;
     private String defaultValue;
     private String description;
@@ -34,10 +34,10 @@ public class TemplateProperty {
     public void setName(String name) {
         this.name = name;
     }
-    public String getType() {
+    public SupportType getType() {
         return type;
     }
-    public void setType(String type) {
+    public void setType(SupportType type) {
         this.type = type;
     }
     public Object getValue() {

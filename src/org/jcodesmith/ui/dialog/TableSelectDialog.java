@@ -68,14 +68,17 @@ public class TableSelectDialog extends Dialog {
     
     private java.util.List<TableMeta> retSelectList=new ArrayList<TableMeta>();
     
-
+    private int shellStyle = SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE;
+    
     protected TableSelectDialog(Shell parentShell) {
         super(parentShell);
+        setShellStyle(shellStyle);
     }
     
     protected TableSelectDialog(Shell parentShell,boolean isMultiple) {
         super(parentShell);
         this.isMultiple=isMultiple;
+        setShellStyle(shellStyle);
     }
     
     
@@ -84,12 +87,14 @@ public class TableSelectDialog extends Dialog {
         this.isMultiple=false;
         this.tableName=tableName;
         this.dbName=dbName;
+        setShellStyle(shellStyle);
     }
     public TableSelectDialog(Shell parentShell,java.util.List<String> tblNameList,String dbName) {
         super(parentShell);
         this.isMultiple=true;
         this.tblNameList=tblNameList;
         this.dbName=dbName;
+        setShellStyle(shellStyle);
     }
     
 

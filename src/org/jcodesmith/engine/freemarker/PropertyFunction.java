@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.jcodesmith.engine.SupportType;
 import org.jcodesmith.engine.TemplateProperty;
 
 import freemarker.core.Environment;
@@ -47,7 +48,7 @@ public class PropertyFunction implements TemplateDirectiveModel {
                 if (PARAM_NAME.equals(find)) {
                     p.setName(tk);
                 } else if (PARAM_TYPE.equals(find)) {
-                    p.setType(tk);
+                    p.setType(SupportType.getEnum(tk));
                 } else if (PARAM_DESC.equals(find)) {
                     p.setDescription(tk);
                 } else if (PARAM_DEFAULTVALUE.equals(find)) {

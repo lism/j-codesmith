@@ -110,6 +110,9 @@ public class ConnectionManager {
      */
     public static Connection getConnection(DatabaseConfig dataConfig, boolean reconnect) {
 
+        if(dataConfig==null){
+            new RuntimeException("dataConfig is null.");
+        }
         // 从已有的连接里获取连接
         Connection conn = connMap.get(dataConfig.getManulName());
         if (!reconnect) {

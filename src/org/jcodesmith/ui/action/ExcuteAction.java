@@ -4,14 +4,10 @@
 package org.jcodesmith.ui.action;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.internal.corext.refactoring.code.TempAssignmentFinder;
-import org.eclipse.jdt.internal.ui.preferences.ProjectSelectionDialog;
 import org.eclipse.jface.action.Action;
-import org.eclipse.swt.SWT;
 import org.jcodesmith.JCodeSmithActivator;
 import org.jcodesmith.engine.TemplateObject;
 import org.jcodesmith.plugin.helper.PluginLogger;
-import org.jcodesmith.plugin.resources.DefalutTemplateFile;
 import org.jcodesmith.ui.dialog.ExcuteDialog;
 
 /**

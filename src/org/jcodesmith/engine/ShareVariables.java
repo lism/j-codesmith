@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.jcodesmith.engine.freemarker.PropertyFunction;
 import org.jcodesmith.utils.CommonUtil;
+import org.jcodesmith.utils.OutputUtil;
 
 /**
  * @Type ShareVariables
@@ -30,10 +31,16 @@ import org.jcodesmith.utils.CommonUtil;
  * @Version V1.0
  */
 public class ShareVariables {
+    /**
+     * 指向模板对象自己
+     */
+    public static String TEMPALTE_OBJECT_NAME="this";
+    
     private static Map<String, Object> map = new HashMap<String, Object>();
     static{
         map.put("property", new PropertyFunction());
         map.put("comUtil", new CommonUtil());
+        map.put("outUtil", new OutputUtil());
     }
     private ShareVariables() {
 

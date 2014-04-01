@@ -40,6 +40,7 @@ public class ConnectionWizardPage extends WizardPage {
     private DatabaseConfig databaseConfig = null;
 
     private FileDialog jarDialog;
+    
 
     /**
      * 数据库连接设置引导页面

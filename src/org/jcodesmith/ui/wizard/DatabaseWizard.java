@@ -18,7 +18,6 @@ public class DatabaseWizard extends Wizard {
 	public DatabaseWizard(DatabaseConfig databaseConfig, boolean isEdit) {
 		super.setWindowTitle(isEdit ? PluginMessages.DB_CONNECTION_EDIT : PluginMessages.DB_CONNECTION_NEW);
 		this.databaseConfig = databaseConfig;
-		
 	}
 
 	public DatabaseWizard() {
