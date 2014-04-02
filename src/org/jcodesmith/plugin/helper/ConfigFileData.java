@@ -1,5 +1,7 @@
 package org.jcodesmith.plugin.helper;
 
-public interface ConfigFileData {
+import java.io.Serializable;
+
+public interface ConfigFileData extends Serializable {
     public String getkey();
 }

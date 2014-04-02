@@ -1,14 +1,19 @@
 package org.jcodesmith.db.meta;
 
+import java.io.Serializable;
+
 /**
  * 数据库列元数据
  * 
  * @author greki.shen
  * 
  */
-@SuppressWarnings("rawtypes")
-public class ColumnMeta {
+public class ColumnMeta implements Serializable{
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3359990399863569171L;
     /**
      * 列名称
      */
@@ -24,7 +29,7 @@ public class ColumnMeta {
     /**
      * 对应的java类型
      */
-    private Class javaType;
+   // private Class<?> javaType;
     /**
      * 列长度
      */
@@ -78,14 +83,6 @@ public class ColumnMeta {
         this.typeName = typeName;
     }
 
-    public Class getJavaType() {
-        return javaType;
-    }
-
-    public void setJavaType(Class javaType) {
-        this.javaType = javaType;
-    }
-
     public int getColumnSize() {
         return columnSize;
     }
@@ -130,9 +127,9 @@ public class ColumnMeta {
         this.foreignKey = foreignKey;
     }
 
-    public boolean isStringClass() {
-        return this.getJavaType() == String.class;
-    }
+//    public boolean isStringClass() {
+//        return this.getJavaType() == String.class;
+//    }
 
     public String getComment() {
         return comment;

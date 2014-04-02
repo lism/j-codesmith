@@ -1,10 +1,15 @@
 package org.jcodesmith.db.meta;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class TableMeta {
-
+public class TableMeta implements Serializable {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -798088530424104866L;
+
     private String name;
 
     private String comment;
@@ -13,6 +18,9 @@ public class TableMeta {
    
     private List<ColumnMeta> columns;
     
+    public TableMeta(){
+        
+    }
     public TableMeta(DatabaseMeta databaseMeta,String name){
         this.database=databaseMeta;
         this.name=name;

@@ -14,6 +14,8 @@
  */
 package org.jcodesmith.engine;
 
+import java.io.Serializable;
+
 /**
  * @Type TemplateProperty
  * @Desc 
@@ -21,8 +23,12 @@ package org.jcodesmith.engine;
  * @date 2013年11月22日
  * @Version V1.0
  */
-public class TemplateProperty {
+public class TemplateProperty implements Serializable {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 798860056246135200L;
     private String name;
     private SupportType type;
     private Object value;

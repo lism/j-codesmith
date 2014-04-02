@@ -33,6 +33,7 @@ import org.jcodesmith.db.meta.TableMeta;
 import org.jcodesmith.engine.SupportType;
 import org.jcodesmith.engine.TemplateObject;
 import org.jcodesmith.engine.TemplateProperty;
+import org.jcodesmith.engine.helper.ExcuteDialogDataCacheHelper;
 import org.jcodesmith.plugin.helper.PluginHelper;
 import org.jcodesmith.plugin.helper.PluginLogger;
 
@@ -62,11 +63,22 @@ public class ExcuteDialog extends Dialog {
     }
 
     private void initLeftPropertys(Composite parent) {
+        
+        List<TemplateProperty> dlist=ExcuteDialogDataCacheHelper.getPropertyList(tplObject.getTemplatePath());
+        
         for (TemplateProperty p : tplObject.getPropertyList()) {
+            if(dlist!=null){
+                for (TemplateProperty cachep : dlist) {
+                    if(p.getValue()==null && p.getName().equals(cachep.getName())){
+                        p.setValue(cachep.getValue());
+                    }
+                }
+            }
             initProperty(parent, p);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void initProperty(Composite parent, TemplateProperty property) {
 
         Label label = new Label(parent, SWT.NULL);
@@ -75,22 +87,33 @@ public class ExcuteDialog extends Dialog {
         GridData leftgd = new GridData(GridData.FILL_HORIZONTAL);
         leftgd.horizontalSpan = 2;
 
+        
         Control ctr = null;
         if (SupportType.BOOLEAN.equals(property.getType())) {
             Combo combo = new Combo(parent, SWT.NULL);
             combo.setItems(new String[] { "true", "false" });
 
-            if ("false".equals(property.getDefaultValue())) {
-                combo.select(1);
-            } else {
-                combo.select(0);
+        
+            if(property.getValue()!=null){
+                if ("false".equals(property.getValue())) {
+                    combo.select(1);
+                } else {
+                    combo.select(0);
+                }
+            }else{
+                if ("false".equals(property.getDefaultValue())) {
+                    combo.select(1);
+                } else {
+                    combo.select(0);
+                }
             }
             ctr = combo;
         } else {
             Text text = new Text(parent, SWT.BORDER | SWT.SINGLE);
-            text.setText(property.getDefaultValue());
+             text.setText(property.getDefaultValue());
             ctr = text;
             if (SupportType.TABLE.equals(property.getType()) || SupportType.TABLES.equals(property.getType())) {
+                text.setText("");
                 leftgd.horizontalSpan = 1;
                 // creat select type button
                 Button b = new Button(parent, SWT.PUSH);
@@ -102,9 +125,26 @@ public class ExcuteDialog extends Dialog {
                 boolean isMulti = false;
                 if (SupportType.TABLES.equals(property.getType())) {
                     isMulti = true;
+                    if(property.getValue()!=null){
+                        List<TableMeta> list=(List<TableMeta>)property.getValue();
+                        String tblNames=null;
+                        for (TableMeta t : list) {
+                            if(tblNames==null){
+                                tblNames=t.getName();
+                            }else{
+                                tblNames+=","+t.getName();
+                            }
+                        }
+                        text.setText(tblNames);
+                    }
+                }else{
+                    if(property.getValue()!=null){
+                        TableMeta t=(TableMeta)property.getValue();
+                        text.setText(t.getName());
+                    }
                 }
                 b.addSelectionListener(new SelectTableListener(ctr, isMulti));
-                text.setText("");
+               
             }else if(SupportType.DIR.equals(property.getType())){
                 leftgd.horizontalSpan = 1;
                 // creat select type button
@@ -116,7 +156,9 @@ public class ExcuteDialog extends Dialog {
                 b.setLayoutData(btnGd);
                 ctr.setData(property.getValue());
                 b.addSelectionListener(new SelectDirectoryListener(ctr));
-                text.setText("");
+                if(property.getValue()!=null){
+                    text.setText(property.getValue().toString());
+                }
             }
         }
 
@@ -317,6 +359,8 @@ public class ExcuteDialog extends Dialog {
                 p.setValue(((Text) ctr).getText());
             }
         }
+        //保持最后次执行的数据
+        ExcuteDialogDataCacheHelper.setProperty(tplObject.getTemplatePath(), tplObject.getPropertyList());
     }
 
     /**
@@ -423,7 +467,7 @@ public class ExcuteDialog extends Dialog {
             
             String ret = d.open();
             ctrl.setData(ret);
-            if (ret == null || !ret.isEmpty()) {
+            if (ret != null && !ret.isEmpty()) {
                 if (ctrl instanceof Text ) {
                     ((Text) ctrl).setText(ret);
                 }

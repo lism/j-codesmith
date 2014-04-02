@@ -168,7 +168,7 @@ public class MetaManager {
                 columnMeta.setSqlType(rs.getInt("DATA_TYPE"));
                 columnMeta.setTypeName(rs.getString("TYPE_NAME"));
                 // 设置java类型
-                columnMeta.setJavaType(CommonUtil.getClass(rs.getType()));
+              //  columnMeta.setJavaType(CommonUtil.getClass(rs.getType()));
 
                 columnMeta.setColumnSize(rs.getInt("COLUMN_SIZE"));
                 columnMeta.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));

@@ -7,24 +7,29 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jcodesmith.utils.FileUtil;
 
-import com.alibaba.fastjson.JSONObject;
-
 public class PluginConfigFile<T extends ConfigFileData>  {
     private Map<String, T> map = new ConcurrentHashMap<String, T>();
     
     private String fullpath;
     private Class<?>  dataClazz;
 
+    private Serializer serializer=null;
+    
     public PluginConfigFile(String path, Class<?> tClazz) {
         this.fullpath = path;
         this.dataClazz=   tClazz;
+        this.serializer=new JsonSerializer(dataClazz);
     }
-
+    public PluginConfigFile(String path, Class<?> tClazz,Serializer serializer) {
+        this.fullpath = path;
+        this.dataClazz=   tClazz;
+        this.serializer=serializer;
+    }
     /**
      * 序列化成json
      */
     public  void saveToFile() {
-        FileUtil.write(fullpath, JSONObject.toJSONString(getList()));
+        FileUtil.write(fullpath, String.valueOf(serializer.wirteObject(getList())));
     }
 
     private  List<T> getList() {
@@ -47,7 +52,7 @@ public class PluginConfigFile<T extends ConfigFileData>  {
         fullpath = path;
         String json=   FileUtil.read(fullpath);
         try {
-            putlist((List<T>) JSONObject.parseArray(json, dataClazz));
+            putlist((List<T>) serializer.readObject(json));
         } catch (Exception e) {
             e.printStackTrace();
         } 

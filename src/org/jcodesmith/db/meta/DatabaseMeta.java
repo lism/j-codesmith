@@ -1,5 +1,6 @@
 package org.jcodesmith.db.meta;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.jcodesmith.db.dal.DataBaseType;
@@ -10,7 +11,12 @@ import org.jcodesmith.db.dal.DataBaseType;
  * @author greki.shen
  * 
  */
-public class DatabaseMeta {
+public class DatabaseMeta implements Serializable{
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1376244273950083451L;
 
     private String name;
     
@@ -19,7 +25,10 @@ public class DatabaseMeta {
     private String manulName = "";
     
     private List<TableMeta> tableList;
-    
+    public  DatabaseMeta(){
+        
+    }
+            
    public  DatabaseMeta(String name,String manulName,DataBaseType databaseType){
        this.name=name;
        this.manulName=manulName;

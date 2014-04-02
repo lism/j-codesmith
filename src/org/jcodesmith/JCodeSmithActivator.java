@@ -7,6 +7,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.jcodesmith.db.config.DatabaseConfigManager;
 import org.jcodesmith.db.dal.ConnectionManager;
+import org.jcodesmith.engine.helper.ExcuteDialogDataCacheHelper;
 import org.jcodesmith.plugin.InitialPluginResource;
 import org.osgi.framework.BundleContext;
 
@@ -55,6 +56,8 @@ public class JCodeSmithActivator extends AbstractUIPlugin {
 		//TemplateProjectManager.getConfigMgr().load();
 		//初始化资源
 		InitialPluginResource.resouceInitial();
+		//初始化执行过的数据
+		ExcuteDialogDataCacheHelper.load();
 	}
 
 	/*
@@ -63,6 +66,7 @@ public class JCodeSmithActivator extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 	    DatabaseConfigManager.getConfigMgr().saveToFile();
+	    ExcuteDialogDataCacheHelper.saveCache();
         //TemplateProjectManager.getConfigMgr().saveToFile();
 	    ConnectionManager.freeAllConnection();
 		plugin = null;

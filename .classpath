@@ -8,6 +8,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-5.1.6.jar" sourcepath="lib/mysql-connector-5.1.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ojdbc6.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/freemarker-2.3.19.jar" sourcepath="C:/Users/DELL/downloads/freemarker-2.3.19-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/fastjson-1.1.37.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/fastjson-1.1.37.jar" sourcepath="C:/Users/DELL/downloads/fastjson-1.1.39-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
