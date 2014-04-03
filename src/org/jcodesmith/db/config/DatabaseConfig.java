@@ -16,7 +16,11 @@ import org.jcodesmith.utils.FileUtil;
  */
 public class DatabaseConfig implements ConfigFileData {
 
-	private String manulName = "";
+	/**
+     * 
+     */
+    private static final long serialVersionUID = -2840331017478415501L;
+    private String manulName = "";
 	/**
 	 * 数据库类型
 	 */

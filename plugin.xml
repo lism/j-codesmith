@@ -74,6 +74,20 @@
             
       </command>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.jcodesmith.ui.pref.JcodesmithPreferencePage"
+            id="jcodesmith.jcodesmithPreferencePage"
+            name="JCodeSmith">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.jcodesmith.ui.pref.JcodesmithPreferenceInitializer">
+      </initializer>
+   </extension>
    <!--
    <extension
          point="org.eclipse.ui.handlers">

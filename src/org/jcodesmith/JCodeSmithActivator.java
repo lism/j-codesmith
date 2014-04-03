@@ -1,5 +1,6 @@
 package org.jcodesmith;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
@@ -92,4 +93,7 @@ public class JCodeSmithActivator extends AbstractUIPlugin {
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
+	   public static IPreferenceStore preference() {
+	        return plugin.getPreferenceStore();
+	    }
 }

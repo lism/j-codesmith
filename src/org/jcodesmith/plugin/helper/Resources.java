@@ -1,6 +1,5 @@
 package org.jcodesmith.plugin.helper;
 
-import static org.jcodesmith.plugin.helper.PluginSetting.WIKI_FILE_EXTENSION;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -79,21 +78,4 @@ public final class Resources {
 		return null;
 	}
 
-	public static boolean isWikiFile(IResource resource) {
-		return exists(resource) && resource.getFileExtension() != null
-				&& WIKI_FILE_EXTENSION.endsWith(resource.getFileExtension());
-		// return ((!(exists(resource))) || (resource.getFileExtension() ==
-		// null) || (!(WIKI_FILE_EXTENSION.endsWith(resource
-		// .getFileExtension()))));
-	}
-
-	/**
-	 * 是否是wiki文件
-	 * 
-	 * @param file
-	 * @return
-	 */
-	public static boolean isWikiFile(IFile file) {
-		return file.getName().endsWith(WIKI_FILE_EXTENSION);
-	}
 }
