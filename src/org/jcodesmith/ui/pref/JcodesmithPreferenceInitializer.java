@@ -12,6 +12,8 @@ public class JcodesmithPreferenceInitializer extends AbstractPreferenceInitializ
 
     @Override
     public void initializeDefaultPreferences() {
+
+    
     }
 
 }

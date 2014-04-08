@@ -40,7 +40,7 @@ import freemarker.core.ParseException;
 
 /**
  * 
- * @Type DbConfigListDialog
+ * @Type CustomVarDialog
  * @Desc 编辑连接
  * @author DELL
  * @date 2014年1月8日

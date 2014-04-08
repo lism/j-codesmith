@@ -8,6 +8,7 @@ import org.eclipse.jface.preference.ListEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.List;
 
 public class FilesEditor extends ListEditor {
 
@@ -119,4 +120,9 @@ public class FilesEditor extends ListEditor {
         return (String[]) v.toArray(new String[v.size()]);
     }
 
+    
+    public String[] getItems(){
+        List l=getList();
+      return  l.getItems();
+    }
 }
