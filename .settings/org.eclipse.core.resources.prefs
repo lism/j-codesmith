@@ -1,6 +1,0 @@
-eclipse.preferences.version=1
-encoding//resource/ftl/DO.ftl=UTF-8
-encoding//resource/ftl/ibatis.xml.ftl=UTF-8
-encoding//src/org/jcodesmith/db/dal/JdbcHelper.java=UTF-8
-encoding//src/org/jcodesmith/db/meta/ColumnMeta.java=UTF-8
-encoding//src/org/jcodesmith/ui/db/action/GenerateDOAction.java=UTF-8
