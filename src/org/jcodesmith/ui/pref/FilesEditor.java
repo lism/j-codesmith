@@ -111,6 +111,10 @@ public class FilesEditor extends ListEditor {
      * Method declared on ListEditor.
      */
     protected String[] parseString(String stringList) {
+        return parser(stringList);
+    }
+    
+    public static String[] parser(String stringList){
         StringTokenizer st = new StringTokenizer(stringList, File.pathSeparator
                 + "\n\r");//$NON-NLS-1$
         ArrayList<Object> v = new ArrayList<Object>();
@@ -119,7 +123,6 @@ public class FilesEditor extends ListEditor {
         }
         return (String[]) v.toArray(new String[v.size()]);
     }
-
     
     public String[] getItems(){
         List l=getList();

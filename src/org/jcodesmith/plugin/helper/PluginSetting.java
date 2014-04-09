@@ -10,4 +10,5 @@ public class PluginSetting {
 	
 	   
 	   public final static String PREFERENCE_JAR="PREFERENCE_JAR";
+	   public   final static String PREFERENCE_VAR="PREFERENCE_VAR";
 }

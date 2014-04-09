@@ -40,9 +40,12 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jcodesmith.JCodeSmithActivator;
 import org.jcodesmith.engine.CustomVariable;
 import org.jcodesmith.engine.CustomVariableManager;
-import org.jcodesmith.engine.ShareVariables;
+import org.jcodesmith.engine.BuildInVariables;
+import org.jcodesmith.plugin.helper.PluginLogger;
 import org.jcodesmith.plugin.helper.PluginSetting;
 import org.jcodesmith.ui.dialog.CustomVarDialog;
+
+import com.alibaba.fastjson.JSONObject;
 
 public class JcodesmithPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
@@ -50,7 +53,7 @@ public class JcodesmithPreferencePage extends FieldEditorPreferencePage implemen
     protected Button envAddButton;
     protected Button envEditButton;
     protected Button envRemoveButton;
-    protected FilesEditor fileEditor ;
+    protected static FilesEditor fileEditor;
     protected SimpleVariableContentProvider contentProvider = new SimpleVariableContentProvider();
 
     protected static String[] variableTableColumnProperties = { "name", "className", "desc" };
@@ -65,32 +68,61 @@ public class JcodesmithPreferencePage extends FieldEditorPreferencePage implemen
         setPreferenceStore(JCodeSmithActivator.getDefault().getPreferenceStore());
     }
 
+    public static void loadPerference() {
+        try {
+
+            String storeStr = JCodeSmithActivator.getDefault().getPreferenceStore()
+                    .getString(PluginSetting.PREFERENCE_JAR);
+            String[] jars = FilesEditor.parser(storeStr);
+            if (jars != null) {
+                for (String jar : jars) {
+                    CustomVariableManager.add(jar);
+                }
+            }
+
+            storeStr = JCodeSmithActivator.getDefault().getPreferenceStore().getString(PluginSetting.PREFERENCE_VAR);
+            if(storeStr!=null && !storeStr.isEmpty()){
+            List<CustomVariable> varlist = JSONObject.parseArray(storeStr, CustomVariable.class);
+
+            CustomVariableManager.setVarList(varlist);
+            }
+
+        } catch (Exception e) {
+            PluginLogger.log(e);
+        }
+    }
+
     public boolean performOk() {
         CustomVariableManager.clear();
-        //add extens jars
-        if(fileEditor!=null){
-            String[] jars=  fileEditor.getItems();
+        // add extens jars
+        if (fileEditor != null) {
+            String[] jars = fileEditor.getItems();
             for (String jar : jars) {
                 CustomVariableManager.add(jar);
             }
         }
-        //add Variable
-        for (CustomVariable var : (CustomVariable[])contentProvider.getElements(null)) {
-           if(!var.isSystem()){
-               CustomVariableManager.add(var);
-           }
+        // add Variable
+        CustomVariable[] t = contentProvider.getElements();
+        for (CustomVariable var : t) {
+            if (!var.isSystem()) {
+                CustomVariableManager.add(var);
+            }
         }
+
+        // stroe
+        String storeStr = JSONObject.toJSONString(CustomVariableManager.getVarList());
+        getPreferenceStore().setValue(PluginSetting.PREFERENCE_VAR, storeStr);
+
         return super.performOk();
     }
-    
+
     protected void performDefaults() {
         contentProvider.setDefault();
         super.performDefaults();
     }
-    
+
     @Override
     public void init(IWorkbench workbench) {
-        // TODO Auto-generated method stub
 
     }
 
@@ -105,8 +137,7 @@ public class JcodesmithPreferencePage extends FieldEditorPreferencePage implemen
         GridData gdc = new GridData(GridData.FILL_BOTH);
         composite.setLayoutData(gdc);
 
-        fileEditor = new FilesEditor(PluginSetting.PREFERENCE_JAR, "Extends Util Jars",
-                "Extends Util Jars", composite);
+        fileEditor = new FilesEditor(PluginSetting.PREFERENCE_JAR, "Extends Util Jars", "Extends Util Jars", composite);
         fileEditor.setFileExtensions(new String[] { "*.jar", "*.zip", "*.*" });
         fileEditor.setFileExtensionNames(new String[] { "Jar Files (*.jar)", "Zip Files (*.zip)", "All Files (*.*)" });
 
@@ -361,17 +392,19 @@ public class JcodesmithPreferencePage extends FieldEditorPreferencePage implemen
          * The content provider stores variable wrappers for use during editing.
          */
         private List<CustomVariable> list = new ArrayList<CustomVariable>();
-        
-        public void setDefault(){
+
+        public void setDefault() {
             init();
         }
+
         public SimpleVariableContentProvider() {
             init();
         }
-        private void init(){
+
+        private void init() {
             list.clear();
             // add system variable
-            for (Entry<String, Object> v : ShareVariables.entrySet()) {
+            for (Entry<String, Object> v : BuildInVariables.entrySet()) {
                 CustomVariable var = new CustomVariable();
                 var.setName(v.getKey());
                 var.setClassName(v.getValue().getClass().getName());
@@ -382,9 +415,15 @@ public class JcodesmithPreferencePage extends FieldEditorPreferencePage implemen
 
             list.addAll(CustomVariableManager.getVarList());
         }
+
         @Override
         public Object[] getElements(Object inputElement) {
             return list.toArray();
+        }
+
+        public CustomVariable[] getElements() {
+            CustomVariable[] t = new CustomVariable[] {};
+            return list.toArray(t);
         }
 
         /**

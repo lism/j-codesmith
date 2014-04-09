@@ -24,9 +24,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
+import org.jcodesmith.engine.CustomVariableManager;
 import org.jcodesmith.engine.ExcuteTracker;
 import org.jcodesmith.engine.ITemplateEngine;
-import org.jcodesmith.engine.ShareVariables;
+import org.jcodesmith.engine.BuildInVariables;
 import org.jcodesmith.engine.TemplateObject;
 import org.jcodesmith.engine.TemplateProperty;
 
@@ -48,7 +49,7 @@ public class FreemarkEngine implements ITemplateEngine {
     static Configuration configuration=new Configuration();
     static{
         
-        for (Entry<String, Object> en : ShareVariables.entrySet()) {
+        for (Entry<String, Object> en : BuildInVariables.entrySet()) {
                 try {
                     configuration.setSharedVariable(en.getKey(), en.getValue());
                 } catch (TemplateModelException e) {
@@ -137,11 +138,20 @@ public class FreemarkEngine implements ITemplateEngine {
             context=new HashMap<String, Object>();
         }
         if(context instanceof Map){
+            //属性变量
             Map<Object, Object> map=(Map<Object, Object>)context;
             for (TemplateProperty p : templateObj.getPropertyList()) {
                 map.put(p.getName(), p.getValue());
             }
-            map.put(ShareVariables.TEMPALTE_OBJECT_NAME, templateObj);
+            
+            //this变量
+            map.put(BuildInVariables.TEMPALTE_OBJECT_NAME, templateObj);
+            
+            //自定义变量
+            for (Entry<String, Object> e : CustomVariableManager.variableInstanceEntrySet()) {
+                map.put(e.getKey(), e.getValue());
+            }
+            
         }
     }
 }

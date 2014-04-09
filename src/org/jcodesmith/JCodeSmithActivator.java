@@ -10,6 +10,7 @@ import org.jcodesmith.db.config.DatabaseConfigManager;
 import org.jcodesmith.db.dal.ConnectionManager;
 import org.jcodesmith.engine.helper.ExcuteDialogDataCacheHelper;
 import org.jcodesmith.plugin.InitialPluginResource;
+import org.jcodesmith.ui.pref.JcodesmithPreferencePage;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -59,6 +60,9 @@ public class JCodeSmithActivator extends AbstractUIPlugin {
 		InitialPluginResource.resouceInitial();
 		//初始化执行过的数据
 		ExcuteDialogDataCacheHelper.load();
+		
+		//加载自定义变量
+		JcodesmithPreferencePage.loadPerference();
 	}
 
 	/*

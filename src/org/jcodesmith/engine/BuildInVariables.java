@@ -24,13 +24,13 @@ import org.jcodesmith.utils.CommonUtil;
 import org.jcodesmith.utils.OutputUtil;
 
 /**
- * @Type ShareVariables
- * @Desc 模板共享变量
+ * @Type BuildInVariables
+ * @Desc 模板共享变量,内建变量
  * @author DELL
  * @date 2013年12月25日
  * @Version V1.0
  */
-public class ShareVariables {
+public class BuildInVariables {
     /**
      * 指向模板对象自己
      */
@@ -42,7 +42,7 @@ public class ShareVariables {
         map.put("comUtil", new CommonUtil());
         map.put("outUtil", new OutputUtil());
     }
-    private ShareVariables() {
+    private BuildInVariables() {
 
     }
 
