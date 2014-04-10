@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="jcodesmith" url="https://code.google.com/p/j-codesmith/source/browse/update">
+      jcodesmith
+   </description>
+   <feature url="features/jcodesmithf_1.0.0.201404101116.jar" id="jcodesmithf" version="1.0.0.201404101116">
+      <category name="jcodesmith"/>
+   </feature>
+   <category-def name="jcodesmith" label="jcodesmith"/>
+</site>
