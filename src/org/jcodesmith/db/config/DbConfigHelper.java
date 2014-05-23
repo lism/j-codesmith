@@ -14,7 +14,7 @@ public class DbConfigHelper {
         mysql.setDatabaseType(DataBaseType.MYSQL);
         mysql.setDriverClazz("com.mysql.jdbc.Driver");
         mysql.setDriverJars(PluginHelper.getConfigFilePath("/lib/mysql-connector-5.1.6.jar"));
-        mysql.setUrl("jdbc:mysql://192.168.1.15:3306/guser?user=guser&password=guser123&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false");
+        mysql.setUrl("jdbc:mysql://192.168.1.15:3306/32133?user=32131&password=21312&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false");
 
         map.put(DataBaseType.MYSQL, mysql);
 
@@ -22,7 +22,7 @@ public class DbConfigHelper {
         mysql.setDatabaseType(DataBaseType.ORACLE);
         oracle.setDriverClazz("oracle.jdbc.driver.OracleDriver");
         oracle.setDriverJars(PluginHelper.getConfigFilePath("/lib/ojdbc6.jar"));
-        oracle.setUrl("jdbc:oracle:thin:p95169/lx95123@192.168.1.15:1521:orcl");
+        oracle.setUrl("jdbc:oracle:thin:pdsadsa5169/sdada95123@192.168.1.15:1521:orcl");
 
         map.put(DataBaseType.ORACLE, oracle);
 
